@@ -1,0 +1,12 @@
+[Unit]
+Description=PowerMenu
+Requires=lipstick.service
+After=lipstick.service
+
+[Service]
+Type=dbus
+ExecStart=/usr/bin/powermenu-daemon
+BusName=org.coderus.powermenu
+
+[Install]
+WantedBy=post-user-session.target
