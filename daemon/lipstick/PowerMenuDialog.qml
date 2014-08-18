@@ -98,7 +98,7 @@ SystemWindow {
                     text: "Shutdown"
                     iconSource: "image://theme/icon-l-power?#000000"
                     onClicked: {
-                        powerMenuDialog.remorseRestart()
+                        powerMenuDialog.remorseShutdown()
                     }
                 }
 
@@ -107,7 +107,7 @@ SystemWindow {
                     text: "Reboot"
                     iconSource: "image://theme/icon-l-backup?#000000"
                     onClicked: {
-                        powerMenuDialog.remorseShutdown()
+                        powerMenuDialog.remorseRestart()
                     }
                 }
             }
