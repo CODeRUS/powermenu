@@ -15,7 +15,9 @@ systemd.path = /usr/lib/systemd/user
 mce.files = mce/90-powermenu-keys.ini
 mce.path = /etc/mce
 
-lipstick.files = lipstick/PowerMenuDialog.qml
+lipstick.files = \
+    lipstick/PowerMenuDialog.qml \
+    lipstick/lipstick.patch
 lipstick.path = /usr/share/powermenu-gui/data
 
 INSTALLS = target systemd mce lipstick dbus

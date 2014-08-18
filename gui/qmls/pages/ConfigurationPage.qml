@@ -64,18 +64,14 @@ Page {
 
         PullDownMenu {
             id: pullDown
-            visible: helper.shouldRestartLipstick
-            busy: visible
             MenuItem {
                 text: qsTr("Restart lipstick")
-                visible: helper.shouldRestartLipstick
                 onClicked: {
                     helper.doRestartLipstick()
                 }
             }
             MenuLabel {
-                visible: helper.shouldRestartLipstick
-                text: qsTr("Compositor files patched, please restart lipstick")
+                text: qsTr("Restart lipstick after first install")
             }
         }
 

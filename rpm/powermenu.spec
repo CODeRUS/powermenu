@@ -8,13 +8,16 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.2.1
+Version:    0.2.2
 Release:    1
 Group:      Qt/Qt
 License:    WTFPL
 URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
+Requires:   patch
+Requires(pre):  patch
+Requires(pre):  /usr/bin/patch
 BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
@@ -65,8 +68,17 @@ killall powermenu-gui || true
 fi
 # << pre
 
+%post
+# >> post
+patch -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
+# << post
+
 %preun
 # >> preun
+if [ $1 = 0 ]; then
+patch -R -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
+rm /etc/mce/90-powermenu-keys.ini || true
+fi
 
 if /sbin/pidof powermenu-daemon > /dev/null; then
 killall powermenu-daemon || true
@@ -75,9 +87,14 @@ fi
 if /sbin/pidof powermenu-gui > /dev/null; then
 killall powermenu-gui || true
 fi
-
-#rm /usr/share/lipstick-jolla-home-qt5/qml/PowerMenuDialog.qml || true
 # << preun
+
+%postun
+# >> postun
+if [ $1 = 0 ]; then
+systemctl restart mce.service || true
+fi
+# << postun
 
 %files
 %defattr(-,root,root,-)
