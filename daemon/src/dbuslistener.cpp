@@ -36,7 +36,7 @@ DBusListener::DBusListener(QObject *parent) :
                                          "actionDouble", this, SLOT(powerkeyDoublePressed()));
 
     iface = new QDBusInterface("com.jolla.lipstick.PowerMenuDialog",
-                               "/",
+                               "/org/coderus/powermenu",
                                "com.jolla.lipstick.PowerMenuDialogIf",
                                QDBusConnection::sessionBus(), this);
 

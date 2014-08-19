@@ -191,16 +191,11 @@ SystemWindow {
     }
 
     DBusAdaptor {
-        id: dbusNotifier
-
         service: "com.jolla.lipstick.PowerMenuDialog"
-        path: "/"
+        path: "/org/coderus/powermenu"
         iface: "com.jolla.lipstick.PowerMenuDialogIf"
         xml: "\t<interface name=\"com.jolla.lipstick.PowerMenuDialogIf\">\n" +
              "\t\t<method name=\"openDialog\">\n" +
-             "\t\t</method>\n" +
-             "\t\t<method name=\"loadShortcuts\">\n" +
-             "\t\t<arg name=\"QVariantList\" type=\"av\" direction=\"in\"/>\n" +
              "\t\t</method>\n" +
              "\t</interface>\n"
 
@@ -208,14 +203,6 @@ SystemWindow {
         onOpenDialog: {
             if (!Desktop.instance.screenIsLocked && !Desktop.instance.deviceIsLocked) {
                 powerMenuDialog.opacity = 1.0
-            }
-        }
-
-        signal loadShortcuts(variant shortcuts)
-        onLoadShortcuts: {
-            testModel.clear()
-            for (var i = 0; i < shortcuts.count(); i++) {
-                testModel.append({filePath: shortcuts[i].filePath, icon: shortcuts[i].icon, name: shortcuts[i].name})
             }
         }
     }
