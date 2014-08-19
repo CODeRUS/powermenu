@@ -10,13 +10,8 @@ Page {
 
     signal selected(string path)
     property bool searchEnabled: false
+    property bool showHidden: false
     property variant selectedValues: []
-
-    onStatusChanged: {
-        if (status == PageStatus.Activating) {
-            desktopModel.fillData(configurationShowHidden.value)
-        }
-    }
 
     SilicaFlickable {
         id: view
@@ -104,6 +99,7 @@ Page {
         onDataFillEnd: {
             shortcutsRepeater.enabled = true
         }
+        Component.onCompleted: fillData(showHidden)
     }
 
     Component {
@@ -145,11 +141,5 @@ Page {
                 }
             }
         }
-    }
-
-    ConfigurationValue {
-        id: configurationShowHidden
-        key: "/apps/powermenu/showHiddenShortcuts"
-        defaultValue: false
     }
 }

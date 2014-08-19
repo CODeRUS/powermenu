@@ -7,12 +7,10 @@ Image {
     source: "/usr/share/powermenu-gui/images/gear-pattern.png"
     anchors.fill: parent
     fillMode: Image.Tile
-    //opacity: 0.5
-    //asynchronous: true
-    //cache: true
+    property color color: Theme.highlightColor
     layer.effect: ShaderEffect {
         id: shaderItem
-        property color color: Theme.highlightColor
+        property color color: patternBackground.color
 
         fragmentShader: "
             varying mediump vec2 qt_TexCoord0;

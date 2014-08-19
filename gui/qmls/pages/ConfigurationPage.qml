@@ -141,7 +141,7 @@ Page {
                 label: qsTr("Application")
                 value: helper.readDesktopName(configurationPowermenu.longShortcut)
                 onClicked: {
-                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.longShortcut]})
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.longShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectLongShortcut)
                 }
             }
@@ -201,7 +201,7 @@ Page {
                 label: qsTr("Application")
                 value: helper.readDesktopName(configurationPowermenu.shortShortcut)
                 onClicked: {
-                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.shortShortcut]})
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.shortShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectShortShortcut)
                 }
             }
@@ -261,7 +261,7 @@ Page {
                 label: qsTr("Application")
                 value: helper.readDesktopName(configurationPowermenu.doubleShortcut)
                 onClicked: {
-                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.doubleShortcut]})
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.doubleShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectDoubleShortcut)
                 }
             }
@@ -290,6 +290,7 @@ Page {
             ComboBox {
                 width: parent.width
                 label: qsTr("Show hidden shortcuts")
+                description: qsTr("For application selector only")
                 currentIndex: configurationPowermenu.showHiddenShortcuts ? 0 : 1
 
                 menu: ContextMenu {
@@ -307,6 +308,28 @@ Page {
                     }
                 }
             }
+
+            ComboBox {
+                width: parent.width
+                label: qsTr("Fancy menu background")
+                description: qsTr("Requres lipstick restart")
+                currentIndex: configurationPowermenu.fancyBackground ? 0 : 1
+
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Yes")
+                        onClicked: {
+                            configurationPowermenu.fancyBackground = true
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("No")
+                        onClicked: {
+                            configurationPowermenu.fancyBackground = false
+                        }
+                    }
+                }
+            }
         }
 
         VerticalScrollDecorator {}
@@ -320,5 +343,6 @@ Page {
         property string shortShortcut: ""
         property string doubleShortcut: ""
         property bool showHiddenShortcuts: false
+        property bool fancyBackground: true
     }
 }

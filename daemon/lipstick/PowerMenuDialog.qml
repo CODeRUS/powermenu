@@ -6,8 +6,6 @@ import com.jolla.lipstick 0.1
 import Sailfish.Silica 1.0
 import org.coderus.desktopfilemodel 1.0
 
-import "scripts/desktop.js" as Desktop
-
 SystemWindow {
     id: powerMenuDialog
     anchors.fill: parent
@@ -18,19 +16,48 @@ SystemWindow {
     property Item selectedItem
     property Item remorse
 
+    property bool screenIsLocked: desktop.screenIsLocked
+    onScreenIsLockedChanged: {
+        if (screenIsLocked && powerMenuDialog.enabled) {
+            hideDialog()
+        }
+    }
+
+    property bool deviceIsLocked: desktop.deviceIsLocked
+    onDeviceIsLockedChanged: {
+        if (deviceIsLocked && powerMenuDialog.enabled) {
+            hideDialog()
+        }
+    }
+
     Component.onCompleted: {
         console.log("PowerMenuDialog Loaded!")
         powermenuDbus.call("ready", [])
+
+        if (configurationPowermenu.fancyBackground) {
+            var shaderComponent = Qt.createComponent("/usr/share/powermenu-gui/qmls/ShaderTiledBackground.qml");
+            var shaderObject = shaderComponent.createObject(powerMenuDialogBackground, {"color": Theme.primaryColor});
+        }
     }
 
     function showDialog() {
         dialogAdaptor.emitSignal("dialogOpened")
         powerMenuDialog.opacity = 1.0
+
+        topPeekAllowed = false
+        leftPeekAllowed = false
+        rightPeekAllowed = false
+        bottomPeekAllowed = false
     }
 
     function hideDialog() {
         dialogAdaptor.emitSignal("dialogHidden")
         powerMenuDialog.opacity = 0.0
+
+        topPeekAllowed = true
+        leftPeekAllowed = true
+        rightPeekAllowed = true
+        bottomPeekAllowed = true
     }
 
     function restart() {
@@ -78,11 +105,38 @@ SystemWindow {
         width: parent.width
         height: column.height + column.y
         color: Theme.highlightBackgroundColor
+
+        /*Image {
+            id: patternBackground
+            source: "/usr/share/powermenu-gui/images/gear-pattern.png"
+            anchors.fill: parent
+            fillMode: Image.Tile
+            visible: configurationPowermenu.fancyBackground
+            layer.effect: ShaderEffect {
+                id: shaderItem
+                property color color: Theme.primaryColor
+
+                fragmentShader: "
+                    varying mediump vec2 qt_TexCoord0;
+                    uniform highp float qt_Opacity;
+                    uniform lowp sampler2D source;
+                    uniform highp vec4 color;
+                    void main() {
+                        highp vec4 pixelColor = texture2D(source, qt_TexCoord0);
+                        gl_FragColor = vec4(mix(pixelColor.rgb/max(pixelColor.a, 0.00390625), color.rgb/max(color.a, 0.00390625), color.a) * pixelColor.a, pixelColor.a) * qt_Opacity;
+                    }
+                "
+            }
+            layer.enabled: true
+            layer.samplerName: "source"
+        }*/
+
         Column {
             id: column
 
             width: parent.width
             y: Theme.paddingLarge
+            z: 1
             Label {
                 text: "Power Menu"
                 maximumLineCount: 2
@@ -101,7 +155,7 @@ SystemWindow {
                 id: buttonRow
                 property real buttonWidth: width / 2
                 width: parent.width
-                visible: configurationShowShutdown.value
+                visible: configurationPowermenu.showShutdown
 
                 SystemDialogButton {
                     width: buttonRow.buttonWidth
@@ -216,7 +270,7 @@ SystemWindow {
 
         signal openDialog
         onOpenDialog: {
-            if (!Desktop.instance.screenIsLocked && !Desktop.instance.deviceIsLocked) {
+            if (!screenIsLocked && !deviceIsLocked) {
                 showDialog()
             }
         }
@@ -224,21 +278,17 @@ SystemWindow {
 
     DesktopFileSortModel {
         id: desktopModel
-        filterShortcuts: configurationShortcuts.value
+        filterShortcuts: configurationPowermenu.shortcuts
         onlySelected: true
         Component.onCompleted: fillData(false)
     }
 
-    ConfigurationValue {
-        id: configurationShowShutdown
-        key: "/apps/powermenu/showShutdown"
-        defaultValue: true
-    }
-
-    ConfigurationValue {
-        id: configurationShortcuts
-        key: "/apps/powermenu/shortcuts"
-        defaultValue: []
+    ConfigurationGroup {
+        id: configurationPowermenu
+        path: "/apps/powermenu"
+        property bool showShutdown: true
+        property variant shortcuts
+        property bool fancyBackground: true
     }
 
     Component {
