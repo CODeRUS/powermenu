@@ -8,13 +8,12 @@
 #include <QDebug>
 
 DesktopFileModel::DesktopFileModel(QObject *parent) :
-    QAbstractListModel(parent)
+    QAbstractListModel(parent),
+    _showHidden(false)
 {
     _roles[NameRole] = "name";
     _roles[IconRole] = "icon";
     _roles[PathRole] = "path";
-
-    QTimer::singleShot(1, this, SLOT(fillData()));
 }
 
 DesktopFileModel::~DesktopFileModel()
@@ -45,7 +44,10 @@ QVariantMap DesktopFileModel::get(int index)
 
 QString DesktopFileModel::getIconPath(const QString &path) const
 {
-    if (QFile(path).exists()) {
+    if (path.isEmpty()) {
+        return "";
+    }
+    else if (QFile(path).exists()) {
         return path;
     }
     else {
@@ -53,22 +55,27 @@ QString DesktopFileModel::getIconPath(const QString &path) const
     }
 }
 
-void DesktopFileModel::fillData()
+void DesktopFileModel::fillDataReally()
 {
+    beginResetModel();
+    _modelData.clear();
+    endResetModel();
+
     QStringList desktopPath;
     desktopPath << "/usr/share/applications";
     desktopPath << QString("%1/.local/share/applications").arg(QDir::homePath());
-
 
     foreach (const QString &path, desktopPath) {
         QDir desktopDir(path);
         foreach (const QString &desktop, desktopDir.entryList(QStringList() << "*.desktop", QDir::Files, QDir::NoSort)) {
             MDesktopEntry entry(QString("%1/%2").arg(path).arg(desktop));
-            if (entry.isValid()
-                    && entry.type() == "Application"
-                    && !entry.icon().isEmpty()
-                    && entry.icon() != "icon-launcher-dummy"
-                    && !entry.noDisplay()) {
+            if (entry.isValid() && entry.type() == "Application") {
+                if (!_showHidden
+                        && (entry.icon().isEmpty()
+                        || entry.icon() == "icon-launcher-dummy"
+                        || entry.noDisplay())) {
+                    continue;
+                }
                 beginInsertRows(QModelIndex(), rowCount(), rowCount());
                 QVariantMap data;
                 data["name"] = entry.name();
@@ -82,4 +89,10 @@ void DesktopFileModel::fillData()
         }
     }
     Q_EMIT dataFillEnd();
+}
+
+void DesktopFileModel::fillData(bool showHidden)
+{
+    _showHidden = showHidden;
+    QTimer::singleShot(1, this, SLOT(fillDataReally()));
 }

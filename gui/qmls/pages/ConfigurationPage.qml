@@ -1,6 +1,7 @@
 import QtQuick 2.1
 import Sailfish.Silica 1.0
 import org.nemomobile.configuration 1.0
+import ".."
 
 Page {
     id: page
@@ -63,6 +64,7 @@ Page {
         contentHeight: column.height
 
         PullDownMenu {
+            background: Component { ShaderTiledBackground {} }
             id: pullDown
             MenuItem {
                 text: qsTr("Restart lipstick")
@@ -284,6 +286,27 @@ Page {
                     }
                 }
             }
+
+            ComboBox {
+                width: parent.width
+                label: qsTr("Show hidden shortcuts")
+                currentIndex: configurationPowermenu.showHiddenShortcuts ? 0 : 1
+
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTr("Yes")
+                        onClicked: {
+                            configurationPowermenu.showHiddenShortcuts = true
+                        }
+                    }
+                    MenuItem {
+                        text: qsTr("No")
+                        onClicked: {
+                            configurationPowermenu.showHiddenShortcuts = false
+                        }
+                    }
+                }
+            }
         }
 
         VerticalScrollDecorator {}
@@ -296,5 +319,6 @@ Page {
         property string longShortcut: ""
         property string shortShortcut: ""
         property string doubleShortcut: ""
+        property bool showHiddenShortcuts: false
     }
 }

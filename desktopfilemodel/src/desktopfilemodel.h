@@ -22,14 +22,18 @@ public:
 
     QVariantMap get(int index);
 
+    void fillData(bool showHiden);
+
 private:
     QHash<int, QByteArray> _roles;
     QVector<QVariantMap> _modelData;
 
+    bool _showHidden;
+
     QString getIconPath(const QString &path) const;
 
-private slots:
-    void fillData();
+public slots:
+    void fillDataReally();
 
 signals:
     void dataFillEnd();

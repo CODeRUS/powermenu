@@ -2,6 +2,7 @@ import QtQuick 2.1
 import Sailfish.Silica 1.0
 import org.coderus.desktopfilemodel 1.0
 import org.nemomobile.configuration 1.0
+import ".."
 
 Page {
     id: page
@@ -43,6 +44,7 @@ Page {
         }
 
         PullDownMenu {
+            background: Component { ShaderTiledBackground {} }
             MenuItem {
                 text: qsTr("About")
                 onClicked: {
@@ -59,6 +61,7 @@ Page {
         }
 
         PushUpMenu {
+            background: Component { ShaderTiledBackground {} }
             MenuItem {
                 text: qsTr("Add shortcut")
                 onClicked: {
@@ -102,6 +105,7 @@ Page {
         id: desktopModel
         filterShortcuts: shortcutsConfig.value
         onlySelected: true
+        Component.onCompleted: fillData(false)
     }
 
     Component {

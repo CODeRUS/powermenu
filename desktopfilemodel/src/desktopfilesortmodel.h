@@ -28,6 +28,8 @@ public:
 
     Q_INVOKABLE QVariantMap get(int itemIndex);
 
+    Q_INVOKABLE void fillData(bool showHidden);
+
 private:
     DesktopFileModel *_fileModel;
     QStringList _filterShortcuts;

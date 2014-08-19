@@ -69,6 +69,13 @@ QVariantMap DesktopFileSortModel::get(int itemIndex)
     return data;
 }
 
+void DesktopFileSortModel::fillData(bool showHidden)
+{
+    if (_fileModel) {
+        _fileModel->fillData(showHidden);
+    }
+}
+
 bool DesktopFileSortModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const
 {
     if (!_filterShortcuts.isEmpty()) {

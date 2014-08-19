@@ -226,6 +226,7 @@ SystemWindow {
         id: desktopModel
         filterShortcuts: configurationShortcuts.value
         onlySelected: true
+        Component.onCompleted: fillData(false)
     }
 
     ConfigurationValue {

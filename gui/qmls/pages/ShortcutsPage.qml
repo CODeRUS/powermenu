@@ -1,6 +1,8 @@
 import QtQuick 2.1
 import Sailfish.Silica 1.0
 import org.coderus.desktopfilemodel 1.0
+import org.nemomobile.configuration 1.0
+import ".."
 
 Page {
     id: page
@@ -10,12 +12,19 @@ Page {
     property bool searchEnabled: false
     property variant selectedValues: []
 
+    onStatusChanged: {
+        if (status == PageStatus.Activating) {
+            desktopModel.fillData(configurationShowHidden.value)
+        }
+    }
+
     SilicaFlickable {
         id: view
         anchors.fill: page
         contentHeight: content.height
 
         PullDownMenu {
+            background: Component { ShaderTiledBackground {} }
             MenuItem {
                 text: searchEnabled
                       ? qsTr("Hide search field")
@@ -136,5 +145,11 @@ Page {
                 }
             }
         }
+    }
+
+    ConfigurationValue {
+        id: configurationShowHidden
+        key: "/apps/powermenu/showHiddenShortcuts"
+        defaultValue: false
     }
 }
