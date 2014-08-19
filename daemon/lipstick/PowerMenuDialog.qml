@@ -23,14 +23,24 @@ SystemWindow {
         powermenuDbus.call("ready", [])
     }
 
+    function showDialog() {
+        dialogAdaptor.emitSignal("dialogOpened")
+        powerMenuDialog.opacity = 1.0
+    }
+
+    function hideDialog() {
+        dialogAdaptor.emitSignal("dialogHidden")
+        powerMenuDialog.opacity = 0.0
+    }
+
     function restart() {
         dsmeDbus.call("req_reboot", [])
-        powerMenuDialog.opacity = 0
+        hideDialog()
     }
 
     function shutdown() {
         dsmeDbus.call("req_shutdown", [])
-        powerMenuDialog.opacity = 0
+        hideDialog()
     }
 
     function remorseRestart() {
@@ -146,7 +156,7 @@ SystemWindow {
                     }
 
                     onClicked: {
-                        powerMenuDialog.opacity = 0
+                        hideDialog()
                         powermenuDbus.call("openDesktop", [model.path])
                     }
                 }
@@ -163,7 +173,7 @@ SystemWindow {
         }
 
         onClicked: {
-            powerMenuDialog.opacity = 0
+            hideDialog()
         }
 
         Image {
@@ -191,18 +201,23 @@ SystemWindow {
     }
 
     DBusAdaptor {
+        id: dialogAdaptor
         service: "com.jolla.lipstick.PowerMenuDialog"
         path: "/org/coderus/powermenu"
         iface: "com.jolla.lipstick.PowerMenuDialogIf"
         xml: "\t<interface name=\"com.jolla.lipstick.PowerMenuDialogIf\">\n" +
              "\t\t<method name=\"openDialog\">\n" +
              "\t\t</method>\n" +
+             "\t\t<signal name=\"dialogOpened\">\n" +
+             "\t\t</signal>\n" +
+             "\t\t<signal name=\"dialogHidden\">\n" +
+             "\t\t</signal>\n" +
              "\t</interface>\n"
 
         signal openDialog
         onOpenDialog: {
             if (!Desktop.instance.screenIsLocked && !Desktop.instance.deviceIsLocked) {
-                powerMenuDialog.opacity = 1.0
+                showDialog()
             }
         }
     }
