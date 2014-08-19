@@ -15,12 +15,13 @@ systemd.path = /usr/lib/systemd/user
 mce.files = mce/90-powermenu-keys.ini
 mce.path = /etc/mce
 
-lipstick.files = \
-    lipstick/PowerMenuDialog.qml \
-    lipstick/lipstick.patch
-lipstick.path = /usr/share/powermenu-gui/data
+lipstick.files = lipstick/PowerMenuDialog.qml
+lipstick.path = /usr/share/lipstick-jolla-home-qt5/qml
 
-INSTALLS = target systemd mce lipstick dbus
+patch.files = lipstick/lipstick.patch
+patch.path = /usr/share/powermenu-gui/data
+
+INSTALLS = target systemd mce lipstick patch dbus
 
 SOURCES += \
     src/dbuslistener.cpp \

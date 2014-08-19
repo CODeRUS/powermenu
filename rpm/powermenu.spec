@@ -8,7 +8,7 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.2.2
+Version:    0.2.3
 Release:    1
 Group:      Qt/Qt
 License:    WTFPL
@@ -104,6 +104,7 @@ fi
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 %{_datadir}/powermenu-gui
 /usr/share/dbus-1/services/org.coderus.powermenu.service
+/usr/share/lipstick-jolla-home-qt5/qml/PowerMenuDialog.qml
 /usr/lib/systemd/user/powermenu.service
 /usr/lib/qt5/qml/org/coderus/desktopfilemodel
 %config /etc/mce/90-powermenu-keys.ini

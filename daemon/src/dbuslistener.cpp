@@ -8,11 +8,6 @@ DBusListener::DBusListener(QObject *parent) :
     QObject(parent),
     _shouldRestartLipstick(false)
 {
-    QFile menuQml("/usr/share/lipstick-jolla-home-qt5/qml/PowerMenuDialog.qml");
-    if (!menuQml.exists()) {
-        QFile("/usr/share/powermenu-gui/data/PowerMenuDialog.qml").copy(menuQml.fileName());
-    }
-
     QFile compositorQml("/usr/share/lipstick-jolla-home-qt5/qml/compositor.qml");
     if (compositorQml.exists() && compositorQml.open(QFile::ReadWrite)) {
         QByteArray data = compositorQml.readAll();
