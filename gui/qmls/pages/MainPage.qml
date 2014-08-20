@@ -158,7 +158,7 @@ Page {
                     rightMargin: Theme.paddingLarge
                     verticalCenter: iconImage.verticalCenter
                 }
-                visible: model.index < desktopModel.count - 1
+                visible: model.index < view.count - 1
                 onClicked: {
                     moveShortcutDown(model.index)
                 }
