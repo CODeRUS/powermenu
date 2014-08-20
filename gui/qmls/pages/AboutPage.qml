@@ -75,6 +75,14 @@ Page {
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
             }
+
+            Label {
+                text: "\n\nThanks to Morpog for application icon."
+                font.pixelSize: Theme.fontSizeMedium
+                width: parent.width
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
         }
 
         VerticalScrollDecorator {}
