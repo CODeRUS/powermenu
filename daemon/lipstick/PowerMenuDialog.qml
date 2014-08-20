@@ -280,7 +280,7 @@ SystemWindow {
         id: desktopModel
         filterShortcuts: configurationPowermenu.shortcuts
         onlySelected: true
-        Component.onCompleted: fillData(false)
+        showHidden: false
     }
 
     ConfigurationGroup {
