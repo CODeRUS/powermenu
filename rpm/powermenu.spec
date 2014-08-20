@@ -9,7 +9,7 @@ Name:       powermenu
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
 Version:    0.2.4
-Release:    1
+Release:    2
 Group:      Qt/Qt
 License:    WTFPL
 URL:        http://example.org/
