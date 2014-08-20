@@ -7,13 +7,14 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-DesktopFileModel::DesktopFileModel(QObject *parent) :
-    QAbstractListModel(parent),
-    _showHidden(false)
+DesktopFileModel::DesktopFileModel(bool showHidden, QObject *parent) :
+    QAbstractListModel(parent)
 {
     _roles[NameRole] = "name";
     _roles[IconRole] = "icon";
     _roles[PathRole] = "path";
+
+    fillData(showHidden);
 }
 
 DesktopFileModel::~DesktopFileModel()

@@ -4,7 +4,12 @@
 
 DesktopFileSortModel::DesktopFileSortModel(QObject *parent) :
     QSortFilterProxyModel(parent),
-    _onlySelected(false)
+    _onlySelected(false),
+    _showHidden(false)
+{
+}
+
+void DesktopFileSortModel::componentComplete()
 {
     setSortRole(DesktopFileModel::NameRole);
     setSortLocaleAware(true);
@@ -13,11 +18,16 @@ DesktopFileSortModel::DesktopFileSortModel(QObject *parent) :
     setFilterRole(DesktopFileModel::PathRole);
     setFilterCaseSensitivity(Qt::CaseSensitive);
 
-    _fileModel = new DesktopFileModel(this);
+    _fileModel = new DesktopFileModel(_showHidden, this);
     QObject::connect(_fileModel, SIGNAL(dataFillEnd()), this, SIGNAL(dataFillEnd()));
     setSourceModel(_fileModel);
 
     sort(0);
+}
+
+void DesktopFileSortModel::classBegin()
+{
+
 }
 
 int DesktopFileSortModel::count()
@@ -60,6 +70,16 @@ void DesktopFileSortModel::setOnlySelected(bool newValue)
         _onlySelected = newValue;
         setFilterCaseSensitivity(filterCaseSensitivity() == Qt::CaseInsensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
     }
+}
+
+bool DesktopFileSortModel::showHidden()
+{
+    return _showHidden;
+}
+
+void DesktopFileSortModel::setShowHidden(bool newValue)
+{
+    _showHidden = newValue;
 }
 
 QVariantMap DesktopFileSortModel::get(int itemIndex)

@@ -96,10 +96,10 @@ Page {
     DesktopFileSortModel {
         id: desktopModel
         filter: searchField.text
+        showHidden: page.showHidden
         onDataFillEnd: {
             shortcutsRepeater.enabled = true
         }
-        Component.onCompleted: fillData(showHidden)
     }
 
     Component {

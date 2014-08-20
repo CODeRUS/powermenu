@@ -13,7 +13,7 @@ public:
         PathRole
     };
 
-    explicit DesktopFileModel(QObject *parent = 0);
+    explicit DesktopFileModel(bool showHidden, QObject *parent = 0);
     virtual ~DesktopFileModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const;

@@ -105,7 +105,7 @@ Page {
         id: desktopModel
         filterShortcuts: shortcutsConfig.value
         onlySelected: true
-        Component.onCompleted: fillData(false)
+        showHidden: false
     }
 
     Component {
