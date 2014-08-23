@@ -18,7 +18,8 @@ mce.path = /etc/mce
 lipstick.files = lipstick/PowerMenuDialog.qml
 lipstick.path = /usr/share/lipstick-jolla-home-qt5/qml
 
-patch.files = lipstick/lipstick.patch
+patch.files = lipstick/lipstick.patch \
+              lipstick/lipstick_up.patch
 patch.path = /usr/share/powermenu-gui/data
 
 INSTALLS = target systemd mce lipstick patch dbus
