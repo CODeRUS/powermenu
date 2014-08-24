@@ -14,8 +14,13 @@
 #define POWERKEY_MEDIUMDELAY "PowerKey/PowerKeyMediumDelay"
 #define POWERKEY_SHORTACTION "PowerKey/PowerKeyShortAction"
 
-#define MCE_DBUS_PATH "/com/nokia/mce/request"
-#define MCE_DBUS_IFACE "com.nokia.mce.request"
+#define MCE_SERVICE "com.nokia.mce"
+
+#define MCE_REQUEST_PATH "/com/nokia/mce/request"
+#define MCE_REQUEST_IFACE "com.nokia.mce.request"
+
+#define MCE_SIGNAL_PATH "/com/nokia/mce/signal"
+#define MCE_SIGNAL_IFACE "com.nokia.mce.signal"
 
 class DBusListener : public QObject
 {
@@ -69,6 +74,7 @@ private:
     void openPowerMenu();
 
     QDBusInterface *iface;
+    bool _phoneLocked;
 
     bool _shouldRestartLipstick;
 
@@ -77,6 +83,8 @@ private slots:
     void powerkeyLongPressed();
     void powerkeyShortPressed();
     void powerkeyDoublePressed();
+
+    void tklockChanged(const QString &mode);
 };
 
 #endif // DBUSLISTENER_H

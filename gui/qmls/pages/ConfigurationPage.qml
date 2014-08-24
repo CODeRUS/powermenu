@@ -58,6 +58,18 @@ Page {
         configurationPowermenu.doubleShortcut = path
     }
 
+    function selectLongShortcutLocked(path) {
+        configurationPowermenu.longShortcutLocked = path
+    }
+
+    function selectShortShortcutLocked(path) {
+        configurationPowermenu.shortShortcutLocked = path
+    }
+
+    function selectDoubleShortcutLocked(path) {
+        configurationPowermenu.doubleShortcutLocked = path
+    }
+
     SilicaFlickable {
         id: flick
         anchors.fill: page
@@ -136,13 +148,22 @@ Page {
             }
 
             ValueButton {
-                id: longActionShortcut
                 visible: longAction.currentIndex == 7
-                label: qsTr("Application")
+                label: qsTr("Phone unlocked application")
                 value: helper.readDesktopName(configurationPowermenu.longShortcut)
                 onClicked: {
                     var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.longShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectLongShortcut)
+                }
+            }
+
+            ValueButton {
+                visible: longAction.currentIndex == 7
+                label: qsTr("Phone locked application")
+                value: helper.readDesktopName(configurationPowermenu.longShortcutLocked)
+                onClicked: {
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.longShortcutLocked], showHidden: configurationPowermenu.showHiddenShortcuts})
+                    selector.selected.connect(page.selectLongShortcutLocked)
                 }
             }
 
@@ -196,13 +217,22 @@ Page {
             }
 
             ValueButton {
-                id: shortActionShortcut
                 visible: shortAction.currentIndex == 7
-                label: qsTr("Application")
+                label: qsTr("Phone unlocked application")
                 value: helper.readDesktopName(configurationPowermenu.shortShortcut)
                 onClicked: {
                     var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.shortShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectShortShortcut)
+                }
+            }
+
+            ValueButton {
+                visible: shortAction.currentIndex == 7
+                label: qsTr("Phone locked application")
+                value: helper.readDesktopName(configurationPowermenu.shortShortcutLocked)
+                onClicked: {
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.shortShortcutLocked], showHidden: configurationPowermenu.showHiddenShortcuts})
+                    selector.selected.connect(page.selectShortShortcutLocked)
                 }
             }
 
@@ -256,13 +286,22 @@ Page {
             }
 
             ValueButton {
-                id: doubleActionShortcut
                 visible: doubleAction.currentIndex == 7
-                label: qsTr("Application")
+                label: qsTr("Phone unlocked application")
                 value: helper.readDesktopName(configurationPowermenu.doubleShortcut)
                 onClicked: {
                     var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.doubleShortcut], showHidden: configurationPowermenu.showHiddenShortcuts})
                     selector.selected.connect(page.selectDoubleShortcut)
+                }
+            }
+
+            ValueButton {
+                visible: doubleAction.currentIndex == 7
+                label: qsTr("Phone locked application")
+                value: helper.readDesktopName(configurationPowermenu.doubleShortcutLocked)
+                onClicked: {
+                    var selector = pageStack.push(Qt.resolvedUrl("ShortcutsPage.qml"), {selectedValues: [configurationPowermenu.doubleShortcutLocked], showHidden: configurationPowermenu.showHiddenShortcuts})
+                    selector.selected.connect(page.selectDoubleShortcutLocked)
                 }
             }
 
@@ -342,6 +381,9 @@ Page {
         property string longShortcut: ""
         property string shortShortcut: ""
         property string doubleShortcut: ""
+        property string longShortcutLocked: ""
+        property string shortShortcutLocked: ""
+        property string doubleShortcutLocked: ""
         property bool showHiddenShortcuts: false
         property bool fancyBackground: true
     }

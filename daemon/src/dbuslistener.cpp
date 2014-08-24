@@ -6,7 +6,8 @@
 
 DBusListener::DBusListener(QObject *parent) :
     QObject(parent),
-    _shouldRestartLipstick(false)
+    _shouldRestartLipstick(false),
+    _phoneLocked(false)
 {
     QFile compositorQml("/usr/share/lipstick-jolla-home-qt5/qml/compositor.qml");
     if (compositorQml.exists() && compositorQml.open(QFile::ReadWrite)) {
@@ -26,14 +27,22 @@ DBusListener::DBusListener(QObject *parent) :
         }
     }
 
-    QDBusConnection::systemBus().connect("", MCE_DBUS_PATH, MCE_DBUS_IFACE,
+    QDBusReply<QString> reply = QDBusInterface(MCE_SERVICE, MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
+                                               QDBusConnection::systemBus()).call("get_tklock_mode");
+    if (reply.isValid()) {
+        _phoneLocked = (reply.value() == "locked");
+    }
+
+    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
                                          "powerkeyMenu", this, SLOT(powerkeyMenuRequested()));
-    QDBusConnection::systemBus().connect("", MCE_DBUS_PATH, MCE_DBUS_IFACE,
+    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
                                          "actionLong", this, SLOT(powerkeyLongPressed()));
-    QDBusConnection::systemBus().connect("", MCE_DBUS_PATH, MCE_DBUS_IFACE,
+    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
                                          "actionShort", this, SLOT(powerkeyShortPressed()));
-    QDBusConnection::systemBus().connect("", MCE_DBUS_PATH, MCE_DBUS_IFACE,
+    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
                                          "actionDouble", this, SLOT(powerkeyDoublePressed()));
+    QDBusConnection::systemBus().connect("", MCE_SIGNAL_PATH, MCE_SIGNAL_IFACE,
+                                         "tklock_mode_ind", this, SLOT(tklockChanged(QString)));
 
     iface = new QDBusInterface("com.jolla.lipstick.PowerMenuDialog",
                                "/org/coderus/powermenu",
@@ -195,24 +204,53 @@ void DBusListener::powerkeyMenuRequested()
 
 void DBusListener::powerkeyLongPressed()
 {
-    MGConfItem longShortcut("/apps/powermenu/longShortcut");
-    if (!longShortcut.value().isNull()) {
-        openDesktop(longShortcut.value().toString());
+    if (_phoneLocked) {
+        MGConfItem longShortcut("/apps/powermenu/longShortcutLocked");
+        if (!longShortcut.value().isNull()) {
+            openDesktop(longShortcut.value().toString());
+        }
+    }
+    else {
+        MGConfItem longShortcut("/apps/powermenu/longShortcut");
+        if (!longShortcut.value().isNull()) {
+            openDesktop(longShortcut.value().toString());
+        }
     }
 }
 
 void DBusListener::powerkeyShortPressed()
 {
-    MGConfItem shortShortcut("/apps/powermenu/shortShortcut");
-    if (!shortShortcut.value().isNull()) {
-        openDesktop(shortShortcut.value().toString());
+    if (_phoneLocked) {
+        MGConfItem shortShortcut("/apps/powermenu/shortShortcutLocked");
+        if (!shortShortcut.value().isNull()) {
+            openDesktop(shortShortcut.value().toString());
+        }
+    }
+    else {
+        MGConfItem shortShortcut("/apps/powermenu/shortShortcut");
+        if (!shortShortcut.value().isNull()) {
+            openDesktop(shortShortcut.value().toString());
+        }
     }
 }
 
 void DBusListener::powerkeyDoublePressed()
 {
-    MGConfItem doubleShortcut("/apps/powermenu/doubleShortcut");
-    if (!doubleShortcut.value().isNull()) {
-        openDesktop(doubleShortcut.value().toString());
+    if (_phoneLocked) {
+        MGConfItem doubleShortcut("/apps/powermenu/doubleShortcutLocked");
+        if (!doubleShortcut.value().isNull()) {
+            openDesktop(doubleShortcut.value().toString());
+        }
     }
+    else {
+        MGConfItem doubleShortcut("/apps/powermenu/doubleShortcut");
+        if (!doubleShortcut.value().isNull()) {
+            openDesktop(doubleShortcut.value().toString());
+        }
+    }
+}
+
+void DBusListener::tklockChanged(const QString &mode)
+{
+    _phoneLocked = (mode == "locked");
 }
