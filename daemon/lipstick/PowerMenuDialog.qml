@@ -5,6 +5,7 @@ import org.nemomobile.configuration 1.0
 import com.jolla.lipstick 0.1
 import Sailfish.Silica 1.0
 import org.coderus.desktopfilemodel 1.0
+import "../systemwindow"
 
 SystemWindow {
     id: powerMenuDialog

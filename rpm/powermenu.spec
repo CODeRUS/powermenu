@@ -8,11 +8,11 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.2.4
-Release:    2
+Version:    0.2.5
+Release:    1
 Group:      Qt/Qt
 License:    WTFPL
-URL:        http://example.org/
+URL:        https://openrepos.net/content/coderus/powermenu
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
 Requires:   patch
