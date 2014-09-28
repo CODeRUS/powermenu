@@ -13,7 +13,7 @@ DBusListener::DBusListener(QObject *parent) :
     if (compositorQml.exists() && compositorQml.open(QFile::ReadWrite)) {
         QByteArray data = compositorQml.readAll();
         if (!data.contains("PowerMenuDialog") && data.contains("UnresponsiveApplicationDialog")) {
-            data.replace("UnresponsiveApplicationDialog {", "PowerMenuDialog { parent: layersParent; z: 4 }\n\n    UnresponsiveApplicationDialog {");
+            data.replace("UnresponsiveApplicationDialog {", "PowerMenuDialog {}\n\n    UnresponsiveApplicationDialog {");
             compositorQml.resize(0);
             compositorQml.seek(0);
             compositorQml.write(data);

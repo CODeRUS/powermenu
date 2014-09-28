@@ -8,8 +8,8 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.2.5
-Release:    1
+Version:    0.2.4
+Release:    2
 Group:      Qt/Qt
 License:    WTFPL
 URL:        http://example.org/
@@ -70,23 +70,13 @@ fi
 
 %post
 # >> post
-if [ $1 = 2 ]; then
-patch --dry-run -p 1 -i /usr/share/powermenu-gui/data/lipstick_up.patch -d /
-if [ $? = 0 ]; then
-patch -p 1 -i /usr/share/powermenu-gui/data/lipstick_up.patch -d / || true
-fi
-else
 patch -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
-fi
 # << post
 
 %preun
 # >> preun
 if [ $1 = 0 ]; then
-patch --dry-run -R -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d /
-if [ $? = 0 ]; then
 patch -R -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
-fi
 rm /etc/mce/90-powermenu-keys.ini || true
 fi
 

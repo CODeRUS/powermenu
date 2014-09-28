@@ -12,7 +12,7 @@ index 3159661..beb9427 100644
      onDisplayOff: { PeekFilter.cancelGesture(); hideDisplayOffRectangle() }
      onDisplayOn: hideDisplayOffRectangle()
  
-+    PowerMenuDialog { parent: layersParent; z: 4 }
++    PowerMenuDialog {}
 +
      UnresponsiveApplicationDialog {
          id: unresponsiveApplicationDialog
