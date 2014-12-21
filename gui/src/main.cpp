@@ -48,6 +48,11 @@ int main(int argc, char *argv[])
     qInstallMessageHandler(stdoutHandler);
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
+    QTranslator translator;
+    if (translator.load("powermenu_en", "/usr/share/powermenu-gui/translations", QString(), ".qm")) {
+        app->installTranslator(&translator);
+    }
+
     QScopedPointer<QQuickView> view(SailfishApp::createView());
 
     view->rootContext()->setContextProperty("helper", new ShortcutsHelper(view.data()));

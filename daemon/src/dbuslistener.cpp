@@ -6,10 +6,9 @@
 
 DBusListener::DBusListener(QObject *parent) :
     QObject(parent),
-    _shouldRestartLipstick(false),
-    _phoneLocked(false)
+    _shouldRestartLipstick(false)
 {
-    QFile compositorQml("/usr/share/lipstick-jolla-home-qt5/qml/compositor.qml");
+    QFile compositorQml("/usr/share/lipstick-jolla-home-qt5/compositor.qml");
     if (compositorQml.exists() && compositorQml.open(QFile::ReadWrite)) {
         QByteArray data = compositorQml.readAll();
         if (!data.contains("PowerMenuDialog") && data.contains("UnresponsiveApplicationDialog")) {
@@ -27,27 +26,18 @@ DBusListener::DBusListener(QObject *parent) :
         }
     }
 
-    QDBusReply<QString> reply = QDBusInterface(MCE_SERVICE, MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
-                                               QDBusConnection::systemBus()).call("get_tklock_mode");
-    if (reply.isValid()) {
-        _phoneLocked = (reply.value() == "locked");
-    }
-
-    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
-                                         "powerkeyMenu", this, SLOT(powerkeyMenuRequested()));
-    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
-                                         "actionLong", this, SLOT(powerkeyLongPressed()));
-    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
-                                         "actionShort", this, SLOT(powerkeyShortPressed()));
-    QDBusConnection::systemBus().connect("", MCE_REQUEST_PATH, MCE_REQUEST_IFACE,
-                                         "actionDouble", this, SLOT(powerkeyDoublePressed()));
     QDBusConnection::systemBus().connect("", MCE_SIGNAL_PATH, MCE_SIGNAL_IFACE,
-                                         "tklock_mode_ind", this, SLOT(tklockChanged(QString)));
+                                         "power_button_trigger", this, SLOT(powerButtonTrigger(QString)));
 
     iface = new QDBusInterface("com.jolla.lipstick.PowerMenuDialog",
                                "/org/coderus/powermenu",
                                "com.jolla.lipstick.PowerMenuDialogIf",
                                QDBusConnection::sessionBus(), this);
+
+    mce = new QDBusInterface(MCE_SERVICE,
+                             MCE_REQUEST_PATH,
+                             MCE_REQUEST_IFACE,
+                             QDBusConnection::systemBus(), this);
 
 
     qDebug() << "DBus service" << (QDBusConnection::sessionBus().registerService("org.coderus.powermenu") ? "registered" : "error!");
@@ -56,77 +46,109 @@ DBusListener::DBusListener(QObject *parent) :
                 ? "registered" : "error!");
 
     qDebug() << "listener started";
+
+    setAction1("application1");
+    setAction2("powermenu");
+}
+
+QString DBusListener::getAction1()
+{
+    return getMceValue(MCE_GCONF_POWERKEY_DBUS_ACTION1).toString();
+}
+
+void DBusListener::setAction1(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_DBUS_ACTION1, action);
+}
+
+QString DBusListener::getAction2()
+{
+    return getMceValue(MCE_GCONF_POWERKEY_DBUS_ACTION2).toString();
+}
+
+void DBusListener::setAction2(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_DBUS_ACTION2, action);
 }
 
 int DBusListener::getLongPressDelay()
 {
-    return getMceValue(POWERKEY_LONGDELAY).toInt();
+    return getMceValue(MCE_GCONF_POWERKEY_LONG_PRESS_DELAY).toInt();
 }
 
 void DBusListener::setLongPressDelay(int msecs)
 {
-    setMceValue(POWERKEY_LONGDELAY, msecs);
+    setMceValue(MCE_GCONF_POWERKEY_LONG_PRESS_DELAY, QString::number(msecs));
 }
 
-QString DBusListener::getLongPressAction()
+QString DBusListener::getLongPressActionOn()
 {
-    return getMceValue(POWERKEY_LONGACTION).toString();
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_LONG_ON).toString();
 }
 
-// Valid options:
-// disabled - do nothing on short press
-// poweroff - shutdown device
-// softpoweroff - enter soft poweroff mode
-// tklock-lock - lock touchscreen/keypad lock if not locked
-// tklock-unlock - unlock the touchscreen/keypad lock if locked
-// tklock-both - lock the touchscreen/keypad if not locked,
-//               unlock the touchscreen/keypad lock if locked
-// dbus-signal-<signal name> - send a D-Bus signal with the name <signal name> (powerkeyLong, powerkeyDouble, powerkeyShort)
-
-
-void DBusListener::setLongPressAction(const QString &action)
+QString DBusListener::getLongPressActionOff()
 {
-    setMceValue(POWERKEY_LONGACTION, action);
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_LONG_OFF).toString();
+}
+
+void DBusListener::setLongPressActionOn(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_LONG_ON, action);
+}
+
+void DBusListener::setLongPressActionOff(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_LONG_OFF, action);
 }
 
 int DBusListener::getDoublePressDelay()
 {
-    return getMceValue(POWERKEY_DOUBLEDELAY).toInt();
+    return getMceValue(MCE_GCONF_POWERKEY_DOUBLE_PRESS_DELAY).toInt();
 }
 
 void DBusListener::setDoublePressDelay(int msecs)
 {
-    setMceValue(POWERKEY_DOUBLEDELAY, msecs);
+    setMceValue(MCE_GCONF_POWERKEY_DOUBLE_PRESS_DELAY, QString::number(msecs));
 }
 
-QString DBusListener::getDoublePressAction()
+QString DBusListener::getDoublePressActionOn()
 {
-    return getMceValue(POWERKEY_DOUBLEACTION).toString();
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_DOUBLE_ON).toString();
 }
 
-void DBusListener::setDoublePressAction(const QString &action)
+QString DBusListener::getDoublePressActionOff()
 {
-    setMceValue(POWERKEY_DOUBLEACTION, action);
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_DOUBLE_OFF).toString();
 }
 
-int DBusListener::getMediumPressDelay()
+void DBusListener::setDoublePressActionOn(const QString &action)
 {
-    return getMceValue(POWERKEY_MEDIUMDELAY).toInt();
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_DOUBLE_ON, action);
 }
 
-void DBusListener::setMediumPressDelay(int msecs)
+void DBusListener::setDoublePressActionOff(const QString &action)
 {
-    setMceValue(POWERKEY_MEDIUMDELAY, msecs);
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_DOUBLE_OFF, action);
 }
 
-QString DBusListener::getShortPressAction()
+QString DBusListener::getShortPressActionOn()
 {
-    return getMceValue(POWERKEY_SHORTACTION).toString();
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_SINGLE_ON).toString();
 }
 
-void DBusListener::setShortPressAction(const QString &action)
+QString DBusListener::getShortPressActionOff()
 {
-    setMceValue(POWERKEY_SHORTACTION, action);
+    return getMceValue(MCE_GCONF_POWERKEY_ACTIONS_SINGLE_OFF).toString();
+}
+
+void DBusListener::setShortPressActionOn(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_SINGLE_ON, action);
+}
+
+void DBusListener::setShortPressActionOff(const QString &action)
+{
+    setMceValue(MCE_GCONF_POWERKEY_ACTIONS_SINGLE_OFF, action);
 }
 
 bool DBusListener::shouldRestartLipstick()
@@ -162,20 +184,18 @@ void DBusListener::ready()
 
 QVariant DBusListener::getMceValue(const QString &key)
 {
-    QSettings mceini(POWERMENU_MCE, QSettings::IniFormat);
-    qDebug() << "getMceValue" << key << mceini.value(key);
-    return mceini.value(key);
+    QDBusReply<QVariant> reply = mce->call(QDBus::AutoDetect, "get_config", key);
+    if (reply.isValid()) {
+        return reply.value();
+    }
+    else {
+        return QVariant();
+    }
 }
 
 void DBusListener::setMceValue(const QString &key, const QVariant &value)
 {
-    qDebug() << "setMceValue" << key << value;
-
-    QSettings mceini(POWERMENU_MCE, QSettings::IniFormat);
-    mceini.setValue(key, value);
-    mceini.sync();
-
-    restartSystemService("mce.service");
+    mce->call(QDBus::AutoDetect, "set_config", key, QVariant::fromValue(QDBusVariant(value)));
 }
 
 void DBusListener::restartSystemService(const QString &serviceName)
@@ -197,60 +217,22 @@ void DBusListener::openPowerMenu()
     }
 }
 
-void DBusListener::powerkeyMenuRequested()
+void DBusListener::powerButtonTrigger(const QString &triggerName)
 {
-    openPowerMenu();
-}
-
-void DBusListener::powerkeyLongPressed()
-{
-    if (_phoneLocked) {
-        MGConfItem longShortcut("/apps/powermenu/longShortcutLocked");
-        if (!longShortcut.value().isNull()) {
-            openDesktop(longShortcut.value().toString());
+    qDebug() << "powerButtonTrigger" << triggerName;
+    if (triggerName == "powermenu") {
+        openPowerMenu();
+    }
+    else if (triggerName == "application1") {
+        MGConfItem shortcut1("/apps/powermenu/applicationShortcut1");
+        if (!shortcut1.value().isNull()) {
+            openDesktop(shortcut1.value().toString());
         }
     }
-    else {
-        MGConfItem longShortcut("/apps/powermenu/longShortcut");
-        if (!longShortcut.value().isNull()) {
-            openDesktop(longShortcut.value().toString());
+    else if (triggerName == "application2") {
+        MGConfItem shortcut2("/apps/powermenu/applicationShortcut2");
+        if (!shortcut2.value().isNull()) {
+            openDesktop(shortcut2.value().toString());
         }
     }
-}
-
-void DBusListener::powerkeyShortPressed()
-{
-    if (_phoneLocked) {
-        MGConfItem shortShortcut("/apps/powermenu/shortShortcutLocked");
-        if (!shortShortcut.value().isNull()) {
-            openDesktop(shortShortcut.value().toString());
-        }
-    }
-    else {
-        MGConfItem shortShortcut("/apps/powermenu/shortShortcut");
-        if (!shortShortcut.value().isNull()) {
-            openDesktop(shortShortcut.value().toString());
-        }
-    }
-}
-
-void DBusListener::powerkeyDoublePressed()
-{
-    if (_phoneLocked) {
-        MGConfItem doubleShortcut("/apps/powermenu/doubleShortcutLocked");
-        if (!doubleShortcut.value().isNull()) {
-            openDesktop(doubleShortcut.value().toString());
-        }
-    }
-    else {
-        MGConfItem doubleShortcut("/apps/powermenu/doubleShortcut");
-        if (!doubleShortcut.value().isNull()) {
-            openDesktop(doubleShortcut.value().toString());
-        }
-    }
-}
-
-void DBusListener::tklockChanged(const QString &mode)
-{
-    _phoneLocked = (mode == "locked");
 }

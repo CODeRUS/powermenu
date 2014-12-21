@@ -8,13 +8,14 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.2.5
+Version:    0.4
 Release:    1
 Group:      Qt/Qt
 License:    WTFPL
 URL:        https://openrepos.net/content/coderus/powermenu
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   sailfishsilica-qt5 >= 0.10.9
+Requires:   sailfish-version >= 1.1.1
 Requires:   patch
 Requires(pre):  patch
 Requires(pre):  /usr/bin/patch
@@ -77,7 +78,6 @@ patch -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
 # >> preun
 if [ $1 = 0 ]; then
 patch -R -p 1 -i /usr/share/powermenu-gui/data/lipstick.patch -d / || true
-rm /etc/mce/90-powermenu-keys.ini || true
 fi
 
 if /sbin/pidof powermenu-daemon > /dev/null; then
@@ -89,24 +89,16 @@ killall powermenu-gui || true
 fi
 # << preun
 
-%postun
-# >> postun
-if [ $1 = 0 ]; then
-systemctl restart mce.service || true
-fi
-# << postun
-
 %files
 %defattr(-,root,root,-)
-%attr(4755, root, root) %{_bindir}/powermenu-daemon
+%{_bindir}/powermenu-daemon
 %{_bindir}/powermenu-gui
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 %{_datadir}/powermenu-gui
 /usr/share/dbus-1/services/org.coderus.powermenu.service
-/usr/share/lipstick-jolla-home-qt5/qml/PowerMenuDialog.qml
+/usr/share/lipstick-jolla-home-qt5/PowerMenuDialog.qml
 /usr/lib/systemd/user/powermenu.service
 /usr/lib/qt5/qml/org/coderus/desktopfilemodel
-%config /etc/mce/90-powermenu-keys.ini
 # >> files
 # << files

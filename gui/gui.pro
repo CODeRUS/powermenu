@@ -18,7 +18,10 @@ qmls.path = /usr/share/powermenu-gui
 images.files = images
 images.path = /usr/share/powermenu-gui
 
-INSTALLS = target desktops icons qmls images
+translations.files = translations/powermenu_en.qm
+translations.path = /usr/share/powermenu-gui/translations
+
+INSTALLS = target desktops icons qmls images translations
 
 SOURCES += \
     src/main.cpp \

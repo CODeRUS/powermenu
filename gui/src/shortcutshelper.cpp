@@ -3,13 +3,20 @@
 #include <QTimer>
 #include <QDebug>
 #include <mlite5/MDesktopEntry>
+#include <QSettings>
 
 ShortcutsHelper::ShortcutsHelper(QObject *parent) :
     QObject(parent)
 {
     QTimer::singleShot(1, this, SLOT(checkVersion()));
+    QTimer::singleShot(1, this, SLOT(createInterface()));
 
-    iface = new QDBusInterface("org.coderus.powermenu", "/", "org.coderus.powermenu", QDBusConnection::sessionBus(), this);
+    nam = new QNetworkAccessManager(this);
+
+    QSettings settings;
+    settings.sync();
+    QString code = settings.value("code", "demo").toString();
+    checkActivation(code);
 }
 
 int ShortcutsHelper::getLongPressDelay()
@@ -27,24 +34,45 @@ void ShortcutsHelper::setLongPressDelay(int msecs)
 {
     if (iface) {
         iface->call(QDBus::NoBlock, "setLongPressDelay", msecs);
+        Q_EMIT longPressDelayChanged();
     }
 }
 
-QString ShortcutsHelper::getLongPressAction()
+QString ShortcutsHelper::getLongPressActionOn()
 {
     if (iface) {
-        QDBusReply<QString> reply = iface->call("getLongPressAction");
+        QDBusReply<QString> reply = iface->call("getLongPressActionOn");
         if (reply.isValid()) {
             return reply.value();
         }
     }
-    return "poweroff";
+    return "shutdown";
 }
 
-void ShortcutsHelper::setLongPressAction(const QString &action)
+QString ShortcutsHelper::getLongPressActionOff()
 {
     if (iface) {
-        iface->call(QDBus::NoBlock, "setLongPressAction", action);
+        QDBusReply<QString> reply = iface->call("getLongPressActionOff");
+        if (reply.isValid()) {
+            return reply.value();
+        }
+    }
+    return "";
+}
+
+void ShortcutsHelper::setLongPressActionOn(const QString &action)
+{
+    if (iface) {
+        iface->call(QDBus::NoBlock, "setLongPressActionOn", action);
+        Q_EMIT longPressActionOnChanged();
+    }
+}
+
+void ShortcutsHelper::setLongPressActionOff(const QString &action)
+{
+    if (iface) {
+        iface->call(QDBus::NoBlock, "setLongPressActionOff", action);
+        Q_EMIT longPressActionOffChanged();
     }
 }
 
@@ -63,60 +91,83 @@ void ShortcutsHelper::setDoublePressDelay(int msecs)
 {
     if (iface) {
         iface->call(QDBus::NoBlock, "setDoublePressDelay", msecs);
+        Q_EMIT doublePressDelayChanged();
     }
 }
 
-QString ShortcutsHelper::getDoublePressAction()
+QString ShortcutsHelper::getDoublePressActionOn()
 {
     if (iface) {
-        QDBusReply<QString> reply = iface->call("getDoublePressAction");
+        QDBusReply<QString> reply = iface->call("getDoublePressActionOn");
         if (reply.isValid()) {
             return reply.value();
         }
     }
-    return "disabled";
+    return "blank,tklock,devlock";
 }
 
-void ShortcutsHelper::setDoublePressAction(const QString &action)
+QString ShortcutsHelper::getDoublePressActionOff()
 {
     if (iface) {
-        iface->call(QDBus::NoBlock, "setDoublePressAction", action);
-    }
-}
-
-int ShortcutsHelper::getMediumPressDelay()
-{
-    if (iface) {
-        QDBusReply<int> reply = iface->call("getMediumPressDelay");
+        QDBusReply<QString> reply = iface->call("getDoublePressActionOff");
         if (reply.isValid()) {
             return reply.value();
         }
     }
-    return 1000;
+    return "unblank,tkunlock";
 }
 
-void ShortcutsHelper::setMediumPressDelay(int msecs)
+void ShortcutsHelper::setDoublePressActionOn(const QString &action)
 {
     if (iface) {
-        iface->call(QDBus::NoBlock, "setMediumPressDelay", msecs);
+        iface->call(QDBus::NoBlock, "setDoublePressActionOn", action);
+        Q_EMIT doublePressActionOnChanged();
     }
 }
 
-QString ShortcutsHelper::getShortPressAction()
+void ShortcutsHelper::setDoublePressActionOff(const QString &action)
 {
     if (iface) {
-        QDBusReply<QString> reply = iface->call("getShortPressAction");
+        iface->call(QDBus::NoBlock, "setDoublePressActionOff", action);
+        Q_EMIT doublePressActionOffChanged();
+    }
+}
+
+QString ShortcutsHelper::getShortPressActionOn()
+{
+    if (iface) {
+        QDBusReply<QString> reply = iface->call("getShortPressActionOn");
         if (reply.isValid()) {
             return reply.value();
         }
     }
-    return "tklock-lock";
+    return "blank,tklock";
 }
 
-void ShortcutsHelper::setShortPressAction(const QString &action)
+QString ShortcutsHelper::getShortPressActionOff()
 {
     if (iface) {
-        iface->call(QDBus::NoBlock, "setShortPressAction", action);
+        QDBusReply<QString> reply = iface->call("getShortPressActionOff");
+        if (reply.isValid()) {
+            return reply.value();
+        }
+    }
+    return "unblank";
+}
+
+void ShortcutsHelper::setShortPressActionOn(const QString &action)
+{
+    if (iface) {
+        iface->call(QDBus::NoBlock, "setShortPressActionOn", action);
+        Q_EMIT shortPressActionOnChanged();
+    }
+}
+
+void ShortcutsHelper::setShortPressActionOff(const QString &action)
+{
+    if (iface) {
+        iface->call(QDBus::NoBlock, "setShortPressActionOff", action);
+        Q_EMIT shortPressActionOffChanged();
     }
 }
 
@@ -134,6 +185,21 @@ bool ShortcutsHelper::shouldRestartLipstick()
 QString ShortcutsHelper::version() const
 {
     return _version;
+}
+
+QString ShortcutsHelper::bannerPath() const
+{
+    return _bannerPath;
+}
+
+void ShortcutsHelper::checkActivation(const QString &code)
+{
+    QSettings settings;
+    settings.setValue("code", code);
+    settings.sync();
+
+    QString url(QByteArray::fromBase64("aHR0cHM6Ly9jb2RlcnVzLm9wZW5yZXBvcy5uZXQvd2hpdGVzb2Z0L2xncmVtb3RlLyUx="));
+    QObject::connect(nam->get(QNetworkRequest(QUrl(url.arg(code)))), SIGNAL(finished()), this, SLOT(onActivationReply()));
 }
 
 bool ShortcutsHelper::checkAutostart()
@@ -178,6 +244,15 @@ QString ShortcutsHelper::readDesktopName(const QString &path) const
     return path;
 }
 
+void ShortcutsHelper::onActivationReply()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply*>(sender());
+    if (reply) {
+        _bannerPath = QString::fromUtf8(reply->readAll());
+        Q_EMIT bannerPathChanged();
+    }
+}
+
 void ShortcutsHelper::checkVersion()
 {
     QProcess app;
@@ -187,4 +262,9 @@ void ShortcutsHelper::checkVersion()
     }
     _version = QString::fromLocal8Bit(app.readAll().constData());
     Q_EMIT versionChanged();
+}
+
+void ShortcutsHelper::createInterface()
+{
+    iface = new QDBusInterface("org.coderus.powermenu", "/", "org.coderus.powermenu", QDBusConnection::sessionBus(), this);
 }

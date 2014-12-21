@@ -5,12 +5,6 @@
 
 #include "dbuslistener.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <grp.h>
-#include <pwd.h>
-
 const char* msgTypeToString(QtMsgType type)
 {
     switch (type) {
@@ -51,7 +45,6 @@ void stdoutHandler(QtMsgType type, const QMessageLogContext &context, const QStr
 int main(int argc, char *argv[])
 {
     qInstallMessageHandler(stdoutHandler);
-    setuid(0);
 
     QScopedPointer<QGuiApplication> app(new QGuiApplication(argc, argv));
     new DBusListener(app.data());

@@ -42,6 +42,13 @@ Page {
                 wrapMode: Text.WordWrap
             }
 
+            Image {
+                anchors.horizontalCenter: parent.horizontalCenter
+                source: helper.bannerPath
+                asynchronous: true
+                cache: true
+            }
+
             Label {
                 text: "\n\nWe accept donations via"
                 font.pixelSize: Theme.fontSizeMedium
@@ -82,6 +89,30 @@ Page {
                 width: parent.width
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.WordWrap
+            }
+
+            Button {
+                text: qsTr("Activate product")
+                anchors.horizontalCenter: parent.horizontalCenter
+                onClicked: {
+                    codeField.visible = true
+                    codeField.forceActiveFocus()
+                }
+            }
+
+            TextField {
+                id: codeField
+                width: parent.width
+                inputMethodHints: Qt.ImhEmailCharactersOnly | Qt.ImhNoAutoUppercase
+                placeholderText: qsTr("Enter your PayPal e-mail")
+                label: qsTr("PayPal e-mail")
+                EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                EnterKey.onClicked: {
+                    helper.checkActivation(text.toLowerCase())
+                    page.forceActiveFocus()
+                    codeField.visible = false
+                }
+                visible: false
             }
         }
 
