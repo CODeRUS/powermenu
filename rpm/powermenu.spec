@@ -8,7 +8,7 @@ Name:       powermenu
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 Summary:    PowerMenu
-Version:    0.4
+Version:    0.4.5
 Release:    1
 Group:      Qt/Qt
 License:    WTFPL

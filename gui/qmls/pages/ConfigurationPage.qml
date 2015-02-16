@@ -272,7 +272,6 @@ Page {
             ComboBox {
                 width: parent.width
                 label: qsTr("Fancy menu background")
-                description: qsTr("Requres lipstick restart")
                 currentIndex: configurationPowermenu.fancyBackground ? 0 : 1
 
                 menu: ContextMenu {

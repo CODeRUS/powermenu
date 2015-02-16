@@ -9,27 +9,30 @@ Page {
     objectName: "mainPage"
 
     function addShortcut(path) {
-        var list = []
-        list = shortcutsConfig.value
+        var list = shortcutsConfig.value
         list.splice(list.length, 0, path)
         shortcutsConfig.value = list
     }
 
     function moveShortcutUp(index) {
-        var list = []
-        list = shortcutsConfig.value
+        console.log("moveShortcutUp " + index)
+        var list = shortcutsConfig.value
+        console.log(JSON.stringify(list))
         var temp = list[index - 1]
         list[index - 1] = list[index]
         list[index] = temp
+        console.log(JSON.stringify(list))
         shortcutsConfig.value = list
     }
 
     function moveShortcutDown(index) {
-        var list = []
-        list = shortcutsConfig.value
+        console.log("moveShortcutDown " + index)
+        var list = shortcutsConfig.value
+        console.log(JSON.stringify(list))
         var temp = list[index + 1]
         list[index + 1] = list[index]
         list[index] = temp
+        console.log(JSON.stringify(list))
         shortcutsConfig.value = list
     }
 
@@ -105,7 +108,7 @@ Page {
         id: desktopModel
         filterShortcuts: shortcutsConfig.value
         onlySelected: true
-        showHidden: false
+        showHidden: true
     }
 
     Component {
@@ -118,11 +121,16 @@ Page {
             menu: contextMenu
 
             function removeShortcut() {
+                var itemname = model.path
                 remorseAction(qsTr("Delete shortcut"),
                                      function() {
-                                         var list = []
-                                         list = shortcutsConfig.value
-                                         list.splice(model.index, 1)
+                                         var list = shortcutsConfig.value
+                                         for (var i = 0; i < list.length; i++) {
+                                            if (list[i] == itemname) {
+                                                list.splice(i, 1);
+                                                break;
+                                            }
+                                         }
                                          shortcutsConfig.value = list
                                      }
                 )

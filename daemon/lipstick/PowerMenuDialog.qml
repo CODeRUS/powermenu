@@ -9,13 +9,13 @@ import "systemwindow"
 
 SystemWindow {
     id: powerMenuDialog
-    anchors.fill: parent
 
     opacity: 0
     enabled: opacity > 0
 
     property Item selectedItem
     property Item remorse
+    property Item tiledBackground
 
     property bool screenIsLocked: desktop.screenIsLocked
     onScreenIsLockedChanged: {
@@ -35,10 +35,8 @@ SystemWindow {
         console.log("PowerMenuDialog Loaded!")
         powermenuDbus.call("ready", [])
 
-        if (configurationPowermenu.fancyBackground) {
-            var shaderComponent = Qt.createComponent("/usr/share/powermenu-gui/qmls/ShaderTiledBackground.qml");
-            var shaderObject = shaderComponent.createObject(powerMenuDialogBackground, {"color": Theme.primaryColor});
-        }
+        var shaderComponent = Qt.createComponent("/usr/share/powermenu-gui/qmls/ShaderTiledBackground.qml");
+        tiledBackground = shaderComponent.createObject(powerMenuDialogBackground, {"color": Theme.primaryColor, "visible": configurationPowermenu.fancyBackground});
     }
 
     function showDialog() {
@@ -88,7 +86,7 @@ SystemWindow {
             remorse = remorseComponent.createObject(powerMenuDialog)
         }
 
-        remorse.execute("Poweroff phone",
+        remorse.execute("Shutdown phone",
                         function() {
                             powerMenuDialog.shutdown()
                         }
@@ -103,34 +101,33 @@ SystemWindow {
     Rectangle {
         id: powerMenuDialogBackground
 
+        property int maximumHeight: powerMenuDialog.height - flow.y - (transpose && configurationPowermenu.showShutdown ? (buttonRow.y + buttonRow.height) : 0) - Theme.itemSizeMedium
         width: parent.width
-        height: column.height + column.y
+        height: flow.height + flow.y
         color: Theme.highlightBackgroundColor
 
-        Column {
-            id: column
-
+        Flow {
+            id: flow
             width: parent.width
             y: Theme.paddingLarge
+            spacing: 0
             z: 1
+
             Label {
                 text: "Power Menu"
                 maximumLineCount: 2
                 wrapMode: Text.WordWrap
                 horizontalAlignment: Text.AlignHCenter
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    margins: Theme.paddingLarge
-                }
+                width: parent.width
 
                 font.pixelSize: Theme.fontSizeLarge
                 color: Theme.rgba("black", 0.6)
             }
+
             Row {
                 id: buttonRow
                 property real buttonWidth: width / 2
-                width: parent.width
+                width: transpose ? parent.width : (parent.width / 2)
                 visible: configurationPowermenu.showShutdown
 
                 SystemDialogButton {
@@ -152,15 +149,17 @@ SystemWindow {
                 }
             }
 
-            Repeater {
-                id: desktopRepeater
-                width: parent.width
+            ListView {
+                width: transpose ? parent.width : (parent.width / 2)
+                height: Math.min(contentHeight, powerMenuDialogBackground.maximumHeight)
                 model: desktopModel
+                interactive: contentHeight > height
+                clip: true
                 delegate: BackgroundItem {
                     id: item
                     width: parent.width
                     height: 100
-                    highlightedColor: Theme.primaryColor
+                    highlightedColor: Theme.rgba(Theme.highlightDimmerColor, Theme.highlightBackgroundOpacity)
 
                     Image {
                         id: iconImage
@@ -182,7 +181,7 @@ SystemWindow {
                             leftMargin: Theme.paddingMedium
                             verticalCenter: parent.verticalCenter
                         }
-                        color: item.highlighted ? Theme.highlightColor : Theme.rgba("black", 0.4)
+                        color: item.highlighted ? Theme.highlightColor : Theme.rgba(Theme.highlightDimmerColor, 0.8)
                     }
 
                     onClicked: {
@@ -190,6 +189,7 @@ SystemWindow {
                         powermenuDbus.call("openDesktop", [model.path])
                     }
                 }
+                VerticalScrollDecorator {}
             }
         }
     }
@@ -235,17 +235,17 @@ SystemWindow {
         service: "com.jolla.lipstick.PowerMenuDialog"
         path: "/org/coderus/powermenu"
         iface: "com.jolla.lipstick.PowerMenuDialogIf"
-        xml: "\t<interface name=\"com.jolla.lipstick.PowerMenuDialogIf\">\n" +
-             "\t\t<method name=\"openDialog\">\n" +
-             "\t\t</method>\n" +
-             "\t\t<signal name=\"dialogOpened\">\n" +
-             "\t\t</signal>\n" +
-             "\t\t<signal name=\"dialogHidden\">\n" +
-             "\t\t</signal>\n" +
-             "\t</interface>\n"
+        xml: "<interface name=\"com.jolla.lipstick.PowerMenuDialogIf\">\n" +
+             "\t<method name=\"openDialog\">\n" +
+             "\t\t<annotation name=\"org.freedesktop.DBus.Method.NoReply\" value=\"true\"/>\n" +
+             "\t</method>\n" +
+             "\t<signal name=\"dialogOpened\">\n" +
+             "\t</signal>\n" +
+             "\t<signal name=\"dialogHidden\">\n" +
+             "\t</signal>\n" +
+             "</interface>\n"
 
-        signal openDialog
-        onOpenDialog: {
+        function openDialog() {
             if (!screenIsLocked && !deviceIsLocked) {
                 showDialog()
             }
@@ -256,7 +256,7 @@ SystemWindow {
         id: desktopModel
         filterShortcuts: configurationPowermenu.shortcuts
         onlySelected: true
-        showHidden: false
+        showHidden: true
     }
 
     ConfigurationGroup {
@@ -265,6 +265,7 @@ SystemWindow {
         property bool showShutdown: true
         property variant shortcuts
         property bool fancyBackground: true
+        onFancyBackgroundChanged: tiledBackground.visible = fancyBackground
     }
 
     Component {
